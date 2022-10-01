@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Predicter</title>
+</head>
+<body>
+
+    <body>
+        <h2>NAND gate predictor, made with Keras, Tensorflow</h2>
+    <form method='post'>
+        blueGold: <input type='text' name='in1' placeholder='1 or 0' /></br> 
+        blueMinionsKilled: <input type='text' name='in2' placeholder='1 or 0' /></br>
+        blueJungleMinionsKilled: <input type='text' name='in3' placeholder='1 or 0' /></br>
+        blueAvgLevel: <input type='text' name='in4' placeholder='1 or 0' /></br>
+        redGold: <input type='text' name='in5' placeholder='1 or 0' /></br>
+        redMinionsKilled: <input type='text' name='in6' placeholder='1 or 0' /></br>
+        redJungleMinionsKilled: <input type='text' name='in7' placeholder='1 or 0' /></br>
+        redAvgLevel: <input type='text' name='in8' placeholder='1 or 0' /></br>
+        blueChampKills: <input type='text' name='in9' placeholder='1 or 0' /></br>
+        blueHeraldKills: <input type='text' name='in10' placeholder='1 or 0' /></br>
+        blueDragonKills: <input type='text' name='in11' placeholder='1 or 0' /></br>
+        blueTowersDestroyed: <input type='text' name='in12' placeholder='1 or 0' /></br>
+        redChampKills: <input type='text' name='in13' placeholder='1 or 0' /></br>
+        redHeraldKills: <input type='text' name='in14' placeholder='1 or 0' /></br>
+        redDragonKills: <input type='text' name='in15' placeholder='1 or 0' /></br>
+        redTowersDestroyed: <input type='text' name='in16' placeholder='1 or 0' /></br>
+      <input type='submit'/>
+    </form>
+<h3>The result is {{ result }}</h3>
+
+<button>Game 1</button>
+<button>Game 2</button>
+<button>Game 3</button>
+<div id="gamediv"> 
+    
+</div>
+
+    <script src="./app.js"></script>
+</body>
+</html>
