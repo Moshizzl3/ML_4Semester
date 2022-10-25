@@ -13,6 +13,7 @@ from keras.utils import load_img, img_to_array
 targetSize = 62
 batchSize = 32
 classMode = 'categorical'
+color = 'rgb'
 trainingFiles = 'week_41/vegies/train'
 testFiles = 'week_41/vegies/test'
 validationFiles = 'week_41/vegies/validation'
@@ -24,18 +25,18 @@ train_datagen = ImageDataGenerator(
     rescale=1./255, shear_range=0.2, zoom_range=0.2, horizontal_flip=True)
 
 training_set = train_datagen.flow_from_directory(
-    trainingFiles, target_size=(targetSize, targetSize), batch_size=batchSize, class_mode=classMode)
+    trainingFiles, target_size=(targetSize, targetSize), batch_size=batchSize, class_mode=classMode, color_mode=color)
 
 test_datagen = ImageDataGenerator(rescale=1./255)
 test_set = test_datagen.flow_from_directory(
-    testFiles, target_size=(targetSize, targetSize), batch_size=batchSize, class_mode=classMode)
+    testFiles, target_size=(targetSize, targetSize), batch_size=batchSize, class_mode=classMode, color_mode=color)
 
 
 validation_datagen = ImageDataGenerator(rescale=1./255)
 
 val_datagen = ImageDataGenerator(rescale=1./255)
 validation_set = val_datagen.flow_from_directory(
-    testFiles, target_size=(targetSize, targetSize), batch_size=batchSize, class_mode=classMode)
+    testFiles, target_size=(targetSize, targetSize), batch_size=batchSize, class_mode=classMode, color_mode=color)
 
 # Create model.
 # Here we add the first convolutional layer.
@@ -47,9 +48,15 @@ model.add(Conv2D(filters=64, kernel_size=3, activation="relu",
           input_shape=[targetSize, targetSize, 3]))
 model.add(MaxPool2D(pool_size=2, strides=2))
 
+model.add(Conv2D(filters=64, kernel_size=3, activation="relu",
+          input_shape=[targetSize, targetSize, 3]))
+model.add(MaxPool2D(pool_size=2, strides=2))
+
 model.add(Conv2D(filters=32, kernel_size=3, activation="relu",
           input_shape=[targetSize, targetSize, 3]))
 model.add(MaxPool2D(pool_size=2, strides=2))
+
+
 
 # Flatten.
 # Convert a 2d array to a 1d array
@@ -66,6 +73,7 @@ model.add(Dense(units=15, activation="softmax"))
 model.compile(optimizer='adam', loss='categorical_crossentropy',
               metrics=['accuracy'])
 
+print(model.optimizer.get_config())
 # create logfiles for tensorboard
 log_dir = "./week_41/logs/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tensorboard_callback = tf.keras.callbacks.TensorBoard(
@@ -87,7 +95,7 @@ model.evaluate(test_set)
 # Predict a single new value. Here we need to prepare the image first
 singlePred = 'week_40/myTests/2-2.png'
 test_image = image.image_utils.load_img(
-    singlePred, target_size=[targetSize, targetSize])
+    singlePred, target_size=[targetSize, targetSize], color_mode=color)
 # here set the SAME parameters as on the training in Step 5.
 # possible solution: image.image_utils.load_img  Set image_utils after image.
 

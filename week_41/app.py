@@ -18,17 +18,18 @@ myVegieDic = {0: 'Bean',  1: 'Bitter_Gourd',  2: 'Bottle_Gourd',  3: 'Brinjal', 
               12: 'Pumpkin', 13: 'Radish',  14: 'Tomato'}
 
 targetSize = 62
+color = 'rgb'
 
 #scaler = joblib.load('scaler.gz')
 myModel = load_model('model_vegies1.h5')
 
-singlePred = 'preds/carrot1.jpeg'
+#singlePred = 'preds/carrots3.jpg'
 #singlePred = 'preds/pat.jpg'
 #singlePred = 'preds/cucumbers1.jpg'
-#singlePred = 'preds/califlower1.jpeg'
+singlePred = 'preds/califlower1.jpeg'
 #singlePred = 'week_41/vegies/validation/Bottle_Gourd/1204.jpg'
 test_image = image.image_utils.load_img(
-    singlePred, target_size=[targetSize, targetSize])
+    singlePred, target_size=[targetSize, targetSize], color_mode=color)
 # here set the SAME parameters as on the training in Step 5.
 # possible solution: image.image_utils.load_img  Set image_utils after image.
 
