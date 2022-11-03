@@ -3,18 +3,21 @@ import random
 import numpy as np
 from statistics import mean, median
 
-env = gym.make('CartPole-v0') # load this particular game. Other games are available. (render_mode="rgb_array")
-env.reset()
+# load this particular game. Other games are available. (render_mode="rgb_array")
+env = gym.make('CartPole-v0')
+state = env.reset()
 goal_steps = 200  # Timesteps a game runs
-score_requirement = 50  # Timesteps a game needs to be accepted in to training set. 50 is good
-initial_games = 1000  # 1000 is good
+# Timesteps a game needs to be accepted in to training set. 50 is good
+score_requirement = 50
+initial_games = 10000  # 1000 is good
 numberOfData = 0  # Only for examining number of data
 
 
 def intial_population():
     training_data = []
     scores = []
-    accepted_scores = []  # A list to hold scores for those games, which made it. So we can print them later.
+    # A list to hold scores for those games, which made it. So we can print them later.
+    accepted_scores = []
     for _ in range(initial_games):
         score = 0
         game_memory = []
@@ -24,12 +27,14 @@ def intial_population():
             # ---------------- will show game on screen --------------------------------
             env.render()
             # ---------------- will show game on screen --------------------------------
-            action = random.randrange(0, 2)  # will start with random number from 0 to 1. 0 = push car left. 1 = push car right.
-            observation, reward, done, info = env.step(action)  # makes the game move one Timestep
-                        # the observation object contains these four data points (source):
-                       
+            # will start with random number from 0 to 1. 0 = push car left. 1 = push car right.
+            action = 0 if observation[2] < 0 else 1
+            observation, reward, done, info = env.step(
+                action)  # makes the game move one Timestep
+            # the observation object contains these four data points (source):
+
             if len(prev_observation) > 0:
-                # only add to game memory, if previous observation exists. 
+                # only add to game memory, if previous observation exists.
                 game_memory.append([prev_observation, action])
 
             prev_observation = observation
@@ -44,11 +49,14 @@ def intial_population():
                     output = [0, 1]  # transforms data to One-Hot encoding.
                 elif data[1] == 0:
                     output = [1, 0]  # transforms data to One-Hot encoding.
-                training_data.append([data[0].tolist(), output])  # This list is saved to file.
+                # This list is saved to file.
+                training_data.append([data[0].tolist(), output])
         env.reset()  # Reset game
-        scores.append(score)  # saves the score, even though it did not make it above score_requirement.
+        # saves the score, even though it did not make it above score_requirement.
+        scores.append(score)
 
-    np.save('saved.npy', np.array(training_data))  # saves training_data to file.
+    # saves training_data to file.
+    np.save('saved.npy', np.array(training_data))
     print('-----------------------------------------------')
     print('Number of accepted score: ' + str(len(accepted_scores)))
     print('Number of training_data: ' + str(len(training_data)))

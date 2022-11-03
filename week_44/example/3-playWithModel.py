@@ -5,6 +5,7 @@ import random
 from statistics import mean, median
 import time
 
+
 model = load_model('gamemodel.h5')
 
 env = gym.make('CartPole-v0')
@@ -13,12 +14,13 @@ env.reset()
 goal_steps = 3000
 env._max_episode_steps = 200  # Default is 200
 
+
 action = random.randrange(0, 2)  # The first action is random.
 scores = []
 score = 0
 training_data = []
 numberOfGames = 10
-score_requirement = 30  # This will be incremented stepwise, to make the model stronger
+score_requirement = 50  # This will be incremented stepwise, to make the model stronger
 count = 0
 
 for x in range(numberOfGames):
@@ -53,7 +55,6 @@ for x in range(numberOfGames):
         for data in game_memory:  # Takes all data from game_memory and places it in training_data
             training_data.append([data[0].tolist(), data[1]])  # This list will be saved to file.
 
-        np.save('saved.npy', np.array(training_data))  
                 # NOTE: if there is nothing to save, the saved file will be destroyed.
 print('Average score', mean(scores))
 print('Median score', median(scores))
