@@ -8,19 +8,19 @@ import time
 
 model = load_model('gamemodel.h5')
 
-env = gym.make('CartPole-v0')
+env = gym.make('Acrobot-v1')
 
 env.reset()
-goal_steps = 3000
-env._max_episode_steps = 200  # Default is 200
+goal_steps = 500
+env._max_episode_steps = 500  # Default is 200
 
 
-action = random.randrange(0, 2)  # The first action is random.
+action = random.randrange(0, 3)  # The first action is random.
 scores = []
 score = 0
 training_data = []
 numberOfGames = 10
-score_requirement = 50  # This will be incremented stepwise, to make the model stronger
+score_requirement = -500  # This will be incremented stepwise, to make the model stronger
 count = 0
 
 for x in range(numberOfGames):
@@ -29,18 +29,24 @@ for x in range(numberOfGames):
     game_memory = []
 
     for t in range(goal_steps):
+        # first action is random, the rest from the model.
+        observation, reward, done, info = env.step(action)
         env.render()  # displays game on screen
-        observation, reward, done, info = env.step(action)  # first action is random, the rest from the model.
-        prediction = model.predict(np.array([observation])).tolist()  # gets prediction from model, skal bruger næste gang.
+        # gets prediction from model, skal bruger næste gang.
+        prediction = model.predict(np.array([observation])).tolist()
         # print(prediction) # [[0.48285746574401855, 0.5171425938606262]] this is how the prediction looks like
-        indexOfGuess = prediction[0].index(max(prediction[0])) # max() gets the largest value, index() gets its index. 
+        # max() gets the largest value, index() gets its index.
+        indexOfGuess = prediction[0].index(max(prediction[0]))
         score += reward
         if (indexOfGuess == 0):
             action = 0
-            output = [1, 0]
+            output = [1, 0, 0]
         elif (indexOfGuess == 1):
             action = 1
-            output = [0, 1]
+            output = [0, 1, 0]
+        elif (indexOfGuess == 2):
+            action = 1
+            output = [0, 0, 1]
         if done:
             scores.append(score)
             env.close()
@@ -48,14 +54,7 @@ for x in range(numberOfGames):
         game_memory.append([observation, output])
         count = count + 1
         print("Time: ", t)
-        # print (x)
 
-    # print (game_memory)
-    if score >= score_requirement:  # If a game does well, it is saved.
-        for data in game_memory:  # Takes all data from game_memory and places it in training_data
-            training_data.append([data[0].tolist(), data[1]])  # This list will be saved to file.
-
-                # NOTE: if there is nothing to save, the saved file will be destroyed.
 print('Average score', mean(scores))
 print('Median score', median(scores))
 print('Min score', min(scores))

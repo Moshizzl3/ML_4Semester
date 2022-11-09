@@ -13,15 +13,15 @@ import numpy as np
 from keras.optimizers import Adam
 from pathlib import Path
 
-timeStep = 3000
+timeStep = 500
 
-myEnv_name = "CartPole-v0"  # env i want to use
+myEnv_name = "Acrobot-v1"  # env i want to use
 
 env = gym.make(myEnv_name)  # create env
 
 scores = []
-numberOfGames = 100
-score_requirement = 50  # This will be incremented stepwise, to make the model stronger
+numberOfGames = 250
+score_requirement = -200  # This will be incremented stepwise, to make the model stronger
 count = 0
 
 
@@ -41,7 +41,7 @@ class Agent():
     def getAction(self, state, model):
         if self.is_discrete:
             try:
-          
+
                 # first action is random, the rest from the model.
                 # gets prediction from model, skal bruger næste gang.
                 prediction = model.predict(np.array([state])).tolist()
@@ -50,21 +50,29 @@ class Agent():
                 indexOfGuess = prediction[0].index(max(prediction[0]))
                 if (indexOfGuess == 0):
                     action = 0
-                    output = [1, 0]
+                    output = [1, 0, 0]
                 elif (indexOfGuess == 1):
                     action = 1
-                    output = [0, 1]
+                    output = [0, 1, 0]
+                elif (indexOfGuess == 2):
+                    action = 2
+                    output = [0, 0, 1]
             except:
                 action = 0 if state[2] < 0 else 1
-                if (action == 0):
-                    output = [1, 0]
-                elif (action == 1):
-                    output = [0, 1]
+                if (indexOfGuess == 0):
+                    action = 0
+                    output = [1, 0, 0]
+                elif (indexOfGuess == 1):
+                    action = 1
+                    output = [0, 1, 0]
+                elif (indexOfGuess == 2):
+                    action = 2
+                    output = [0, 0, 1]
 
         else:
             action = np.random.uniform(
                 self.action_low, self.action_high, self.action_shape)  # random choice action
-        self.score += reward
+        print(self.score)
         return [action, output]
 
     def trainAgent(self, newData):
@@ -75,24 +83,25 @@ class Agent():
                 'saved.npy', allow_pickle=True)
             inputData = trainingData[:, 0].tolist()
             outputData = trainingData[:, 1].tolist()
+            forget = int(1*len(trainingData))
             concList = np.concatenate((trainingData, newList), axis=0)
             np.save('saved.npy', concList)
         except:
-            inputData = newList[:, 0].tolist()
-            outputData = newList[:, 1].tolist()
+            inputData = newList[forget:, 0].tolist()
+            outputData = newList[forget:, 1].tolist()
             np.save('saved.npy', newList)
 
         model = Sequential()  # creates new, empty model
-        model.add(Dense(10, activation='relu'))
-        model.add(Dense(256, activation='relu'))            
-        model.add(Dense(128, activation='tanh'))            
-        # model.add(Dense(64, activation='tanh')) # can be used…
-        model.add(Dense(2, activation='softmax'))
-        model.compile(loss='categorical_crossentropy',
+        model.add(Dense(64, activation='relu'))
+        model.add(Dense(128, activation='relu'))
+        model.add(Dense(64, activation='relu'))
+        # model.add(Dense(64, activation='tanh')) # can be used…1
+        model.add(Dense(3, activation='linear'))
+        model.compile(loss='mae',
                       optimizer=Adam(lr=0.0001), metrics=['accuracy'])
         print('New model created, no pre-trained model found...')
 
-        model.fit(inputData, outputData, verbose=1, epochs=10, batch_size=64)
+        model.fit(inputData, outputData, verbose=1, epochs=10)
         model.save('gamemodel.h5')
 
     # NOTE: if there is nothing to save, the saved file will be destroyed.
@@ -100,7 +109,7 @@ class Agent():
 
 agent = Agent(env)
 state = env.reset()  # return the initial state of the game
-action = 0 if state[2] < 0 else 1
+action = random.randint(0,3)
 for x in range(numberOfGames):
     model = load_model('gamemodel.h5')
     print("-------------- number:", x)
@@ -109,26 +118,22 @@ for x in range(numberOfGames):
     env.reset()
     game_memory = []
     for _ in range(timeStep):
-        env.render()
         state, reward, done, info = env.step(action)
         action = agent.getAction(state, model)[0]  # get action from agent
+        agent.score += reward
+        env.render()
         # return tuple with diff info of game and sets next state
         if done:
             scores.append(agent.score)
             env.close()
             break
         game_memory.append([state, agent.getAction(state, model)[1]])
-
-    # print (game_memory)
+        # print (game_memory)
     if agent.score >= score_requirement:  # If a game does well, it is saved.
         for data in game_memory:  # Takes all data from game_memory and places it in training_data
             # This list will be saved to file.
             training_data.append([data[0].tolist(), data[1]])
         agent.trainAgent(training_data)
-        score_requirement = mean(scores)
-
-    print('Average score', mean(scores))
-    print('Median score', median(scores))
-    print('Min score', min(scores))
-    print('Max score', max(scores))
-    print('Number of training_data: ' + str(len(training_data)))
+        score_requirement = 30 if score_requirement >50 else score_requirement + 2
+        print('Agent score:', agent.score)
+        print('score requirement:', score_requirement)

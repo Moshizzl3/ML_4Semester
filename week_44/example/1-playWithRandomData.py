@@ -4,12 +4,12 @@ import numpy as np
 from statistics import mean, median
 
 # load this particular game. Other games are available. (render_mode="rgb_array")
-env = gym.make('CartPole-v0')
-state = env.reset()
-goal_steps = 200  # Timesteps a game runs
+env = gym.make('Acrobot-v1')
+env.reset()
+goal_steps = 500  # Timesteps a game runs
 # Timesteps a game needs to be accepted in to training set. 50 is good
-score_requirement = 50
-initial_games = 10000  # 1000 is good
+score_requirement = -499
+initial_games = 1000  # Number of games to create.
 numberOfData = 0  # Only for examining number of data
 
 
@@ -25,10 +25,10 @@ def intial_population():
         observation = env.reset()  # reset game
         for _ in range(goal_steps):
             # ---------------- will show game on screen --------------------------------
-            env.render()
+   
             # ---------------- will show game on screen --------------------------------
             # will start with random number from 0 to 1. 0 = push car left. 1 = push car right.
-            action = 0 if observation[2] < 0 else 1
+            action = random.randrange(0, 3)
             observation, reward, done, info = env.step(
                 action)  # makes the game move one Timestep
             # the observation object contains these four data points (source):
@@ -45,10 +45,12 @@ def intial_population():
         if score >= score_requirement:  # If a game was successful, it will be saved
             accepted_scores.append(score)  # list to print the scores
             for data in game_memory:  # Takes all data from game_memory and places it in training_data
-                if data[1] == 1:
-                    output = [0, 1]  # transforms data to One-Hot encoding.
-                elif data[1] == 0:
-                    output = [1, 0]  # transforms data to One-Hot encoding.
+                if data[1] == 0:
+                    output = [1, 0, 0]  # transforms data to One-Hot encoding.
+                elif data[1] == 1:
+                    output = [0, 1, 0]  # transforms data to One-Hot encoding.
+                elif data[1] == 2:
+                    output = [0, 0, 1]  # transforms data to One-Hot encoding.
                 # This list is saved to file.
                 training_data.append([data[0].tolist(), output])
         env.reset()  # Reset game
@@ -66,10 +68,10 @@ def intial_population():
     print('Max  score: ' + str(max(scores)))
     print('Min  score: ' + str(min(scores)))
     print('-----------------------------------------------')
-    return training_data
+    return
 
 
-train = intial_population()
+intial_population()
 
 # see what is saved in training_data
 trainingData = np.load('saved.npy', allow_pickle=True)
